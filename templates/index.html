@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Monitoring System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f9f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+        .date-time {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666666;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .box {
+            background-color: #f0f9f0;
+            border: 1px solid #4caf50;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .box:hover {
+            background-color: #ffffff;
+            border-color: #4caf50;
+        }
+        .box h2 {
+            margin-top: 0;
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+        .parameter {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+        .value {
+            font-size: 1.5em;
+            color: #333333;
+            margin-bottom: 10px;
+        }
+        .icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #4caf50;
+        }
+
+        .irrigation-alert, .rain-alert {
+            text-align: center;
+            margin-top: 20px;
+            color: #ff0000; /* Red color for alert */
+        }
+
+        .red-alert {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .rain-icon {
+            color: blue; /* Blue color for rain icon */
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Crop Monitoring System</h1>
+        <div class="date-time" id="date-time"></div>
+        
+        <div class="grid-container">
+            <div class="box" id="temperature-box">
+                <h2>Temperature</h2>
+                <i class="fas fa-thermometer-half icon"></i>
+                <div class="value" id="temperature-value"></div>
+            </div>
+            <div class="box" id="humidity-box">
+                <h2>Humidity</h2>
+                <i class="fas fa-tint icon"></i>
+                <div class="value" id="humidity-value"></div>
+                <div class="rain-alert red-alert" id="rain-alert" style="display: none;">
+                    <i class="fas fa-cloud-showers-heavy"></i> It's Raining
+                </div>
+            </div>
+            <div class="box" id="soil-moisture-box">
+                <h2>Soil Moisture</h2>
+                <i class="fas fa-seedling icon"></i>
+                <div class="value" id="soil-moisture-value"></div>
+                <div class="red-alert" id="red-alert" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i> Soil Moisture is Low !!
+                </div>
+            </div>
+            <div class="box" id="uv-index-box">
+                <h2>UV Index</h2>
+                <i class="fas fa-sun icon"></i>
+                <div class="value" id="uv-index-value"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript imports remain unchanged -->
+   <script>
+    function fetchData() {
+        fetch('/data')
+            .then(response => response.json())
+            .then(data => {
+                const { temperature, humidity, soil_moisture, uv_index } = data;
+                displayData(temperature, humidity, soil_moisture, uv_index);
+                checkIrrigation(soil_moisture);
+                checkHumidity(humidity);
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    }
+    
+    function displayData(temperature, humidity, soilMoisture, uvIndex) {
+        document.getElementById('temperature-value').textContent = temperature;
+        document.getElementById('humidity-value').textContent = humidity;
+        document.getElementById('soil-moisture-value').textContent = soilMoisture;
+        document.getElementById('uv-index-value').textContent = uvIndex;
+    }
+
+    function checkIrrigation(soilMoisture) {
+        const redAlert = document.getElementById('red-alert');
+        if (parseFloat(soilMoisture) < 2.6) {
+            redAlert.style.display = 'block'; // Show red alert
+        } else {
+            redAlert.style.display = 'none'; // Hide red alert if not needed
+        }
+    }
+
+    function checkHumidity(humidity) {
+        const rainAlert = document.getElementById('rain-alert');
+        if (parseFloat(humidity) >= 3.5) {
+            rainAlert.style.display = 'block';
+        } else {
+            rainAlert.style.display = 'none';
+        }
+    }
+ 
+    function updateDateTime() {
+        const dateTimeElement = document.getElementById('date-time');
+        const currentDate = new Date();
+        const formattedDate = currentDate.toLocaleDateString('en-US');
+        const formattedTime = currentDate.toLocaleTimeString('en-US');
+        dateTimeElement.textContent = `Current Date: ${formattedDate}, Time: ${formattedTime}`;
+    }
+
+    // Fetch data initially and then refresh every 5 seconds
+    fetchData();
+    setInterval(fetchData, 5000);
+
+    // Update date and time every second
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+</script>
+</body>
+</html>
