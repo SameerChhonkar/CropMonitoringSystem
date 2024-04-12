@@ -27,3 +27,5 @@ def get_data():
     else:
         return jsonify({})  # Return empty JSON if no data is found
 
+if __name__ == '__main__':
+    app.run(debug=True)
