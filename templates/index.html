@@ -164,7 +164,7 @@
 
     function checkHumidity(humidity) {
         const rainAlert = document.getElementById('rain-alert');
-        if (parseFloat(humidity) >= 3.5) {
+        if (parseFloat(humidity) <= 3.5) {
             rainAlert.style.display = 'block';
         } else {
             rainAlert.style.display = 'none';
