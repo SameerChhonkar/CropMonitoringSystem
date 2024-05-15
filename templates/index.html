@@ -155,7 +155,7 @@
 
     function checkIrrigation(soilMoisture) {
         const redAlert = document.getElementById('red-alert');
-        if (parseFloat(soilMoisture) < 2.6) {
+        if (parseFloat(soilMoisture) > 2.6) {
             redAlert.style.display = 'block'; // Show red alert
         } else {
             redAlert.style.display = 'none'; // Hide red alert if not needed
